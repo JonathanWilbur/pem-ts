@@ -1,0 +1,4 @@
+- Configure karma-coverage
+- Test hasRFC7468CompliantHeader
+- Switch to RFC 7468 Terminology
+- "Empty space can appear between the pre-encapsulation boundary and the base64"

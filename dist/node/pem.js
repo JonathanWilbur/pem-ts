@@ -104,10 +104,10 @@ module.exports = __webpack_require__(1);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rfc7468CompliantPEMHeaders", function() { return rfc7468CompliantPEMHeaders; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rfc7468CompliantPEMLabels", function() { return rfc7468CompliantPEMLabels; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PEMError", function() { return PEMError; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PEMObject", function() { return PEMObject; });
-const rfc7468CompliantPEMHeaders = [
+const rfc7468CompliantPEMLabels = [
     "X509 CERTIFICATE",
     "CERTIFICATE",
     "CERTIFICATE PAIR",
@@ -142,11 +142,37 @@ class PEMError extends Error {
 }
 class PEMObject {
     constructor() {
-        this.header = "";
+        this._label = "";
         this.data = new Uint8Array(0);
     }
-    get hasRFC7468CompliantHeader() {
-        return rfc7468CompliantPEMHeaders.includes(this.header);
+    get label() {
+        PEMObject.validateLabel(this._label);
+        return this._label;
+    }
+    set label(value) {
+        PEMObject.validateLabel(value);
+        this._label = value;
+    }
+    get hasRFC7468CompliantLabel() {
+        return rfc7468CompliantPEMLabels.includes(this.label);
+    }
+    get preEncapsulationBoundary() {
+        return `-----BEGIN ${this.label}-----`;
+    }
+    get postEncapsulationBoundary() {
+        return `-----END ${this.label}-----`;
+    }
+    static validateLabel(label) {
+        if (!label.match(/^[A-Z# ]*$/g))
+            throw new PEMError("Malformed PEM label.");
+        if (label.match(/\s\s/g))
+            throw new PEMError("PEM label cannot contain consecutive spaces.");
+        if (label.match(/--/g))
+            throw new PEMError("PEM label cannot contain consecutive hyphen-minuses.");
+        if (label.match(/^\s+/g) || label.match(/\s+$/g))
+            throw new PEMError("PEM label cannot begin or end with spaces.");
+        if (label.match(/^\-+/g) || label.match(/\-+$/g))
+            throw new PEMError("PEM label cannot begin or end with hyphen-minuses.");
     }
     decode(encoded) {
         const lines = encoded.trim().split("\n");
@@ -156,15 +182,19 @@ class PEMObject {
             throw new PEMError("PEM object did not start with '-----BEGIN '");
         if (!lines[0].endsWith("-----"))
             throw new PEMError("PEM object did not end with '-----'");
-        const header = lines[0].slice(11, (lines[0].length - 5));
+        const preEncapsulationBoundaryLabel = lines[0].slice(11, (lines[0].length - 5));
         if (lines[(lines.length - 1)].indexOf("-----END ") !== 0)
             throw new PEMError("Last line of PEM object did not start with '-----END '");
         if (!lines[(lines.length - 1)].endsWith("-----"))
             throw new PEMError("Last line of PEM object did not end with '-----'");
-        const footer = lines[(lines.length - 1)].slice(9, (lines[(lines.length - 1)].length - 5));
-        if (header !== footer)
-            throw new PEMError("PEM object header does not match footer");
-        this.header = header;
+        const postEncapsulationBoundaryLabel = lines[(lines.length - 1)].slice(9, (lines[(lines.length - 1)].length - 5));
+        if (preEncapsulationBoundaryLabel !== postEncapsulationBoundaryLabel)
+            throw new PEMError("PEM object Pre-encapsulation Boundary label does not match Post-encapsulation Boundary label.");
+        this.label = preEncapsulationBoundaryLabel;
+        lines.slice(1, (lines.length - 1)).forEach(line => {
+            if (line.match(/^\s*$/))
+                throw new PEMError("Blank lines detected within PEM data");
+        });
         const base64data = lines.slice(1, (lines.length - 1)).join("");
         if (typeof TextEncoder !== "undefined") {
             this.data = (new TextEncoder()).encode(atob(base64data));
@@ -177,7 +207,7 @@ class PEMObject {
         }
     }
     encode() {
-        let ret = [`-----BEGIN ${this.header}-----`];
+        let ret = [this.preEncapsulationBoundary];
         let base64data = "";
         if (typeof TextDecoder !== "undefined") {
             base64data = btoa((new TextDecoder("utf-8")).decode(this.data));
@@ -190,27 +220,11 @@ class PEMObject {
         }
         const stringSplitter = new RegExp(".{1," + PEMObject.base64CharactersPerLine + "}", "g");
         ret = ret.concat(base64data.match(stringSplitter) || []);
-        ret.push(`-----END ${this.header}-----`);
+        ret.push(this.postEncapsulationBoundary);
         return ret.join("\n");
     }
 }
 PEMObject.base64CharactersPerLine = 64;
-let pem = new PEMObject();
-pem.header = "CERTIFICATE";
-pem.data = new Uint8Array([
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-]);
-pem.decode(pem.encode());
-console.log(pem.data);
 
 
 /***/ })
