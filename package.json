@@ -1,0 +1,42 @@
+{
+  "bugs": {
+    "email": "jonathan@wilbur.space",
+    "url": "https://github.com/JonathanWilbur/pem-ts/issues"
+  },
+  "contributors": [
+    {
+      "email": "jonathan@wilbur.space",
+      "name": "Jonathan M. Wilbur",
+      "url": "https://jonathan.wilbur.space/"
+    }
+  ],
+  "description": "A package for decoding Privacy-Enhanced Mail (PEM) objects",
+  "devDependencies": {
+    "@types/node": "^10.9.4",
+    "ts-loader": "^4.5.0",
+    "typescript": "^3.0.3",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-command": "^0.4.1"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "homepage": "https://github.com/JonathanWilbur/pem-ts#readme",
+  "keywords": [
+    "PEM"
+  ],
+  "license": "MIT",
+  "main": "./dist/node/pem.js",
+  "name": "pem-ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonathanWilbur/pem-ts.git"
+  },
+  "scripts": {
+    "build": "make -f build/Makefile",
+    "test": "karma run"
+  },
+  "types": "./dist/types/pem.d.ts",
+  "version": "0.1.0"
+}
