@@ -35,20 +35,6 @@ class PEMError extends Error {
     }
 }
 
-/**
- * Used to parse multiple PEMObjects from free-form text.
- */
-// export
-// function parse (text : string) : PEMObject[] {
-//     let ret : PEMObject[] = [];
-//     ret = ret.concat(ret.match())
-//     const lines : string[] = text.trim().split("\n");
-//     while (lines[0].indexOf("-----BEGIN ") !== 0) lines.shift();
-//     if (lines.length === 0)
-//         throw new PEMError("No PEM Pre-Encapsulation Boundary found.");
-//     return [];
-// }
-
 export
 class PEMObject {
 
