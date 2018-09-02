@@ -35,35 +35,55 @@ class PEMError extends Error {
     }
 }
 
+/**
+ * Used to parse multiple PEMObjects from free-form text.
+ */
+// export
+// function parse (text : string) : PEMObject[] {
+//     let ret : PEMObject[] = [];
+//     ret = ret.concat(ret.match())
+//     const lines : string[] = text.trim().split("\n");
+//     while (lines[0].indexOf("-----BEGIN ") !== 0) lines.shift();
+//     if (lines.length === 0)
+//         throw new PEMError("No PEM Pre-Encapsulation Boundary found.");
+//     return [];
+// }
+
 export
 class PEMObject {
 
-    private _label : string = "";
-
-    public get label () : string {
-        PEMObject.validateLabel(this._label);
-        return this._label;
-    }
-
-    public set label (value : string) {
-        PEMObject.validateLabel(value);
-        this._label = value;
-    }
-
-    public data : Uint8Array = new Uint8Array(0);
     public static base64CharactersPerLine : number = 64;
+    public static readonly preEncapsulationBoundaryRegex : RegExp = /^-----BEGIN (?<prelabel>[A-Z# ]*)-----$/m;
+    public static readonly postEncapsulationBoundaryRegex : RegExp = /^-----END (?<postlabel>[A-Z# ]*)-----$/m;
+    public static readonly base64LineRegex : RegExp = /^[A-Za-z0-9\+/=]+$/mg;
+    public static readonly pemObjectRegex : RegExp =
+        new RegExp(
+            PEMObject.preEncapsulationBoundaryRegex.source +
+            "\n(?:\\s*\n)*(?<base64>(?:" +
+            PEMObject.base64LineRegex.source +
+            "\n)*)?" +
+            PEMObject.postEncapsulationBoundaryRegex.source,
+            "mg"
+        );
 
-    public get hasRFC7468CompliantLabel () : boolean {
-        // You don't really have to validate it in this case, so _label is used.
-        return rfc7468CompliantPEMLabels.includes(this._label);
+    public static decodeBase64 (base64 : string) : Uint8Array {
+        if (typeof TextEncoder !== "undefined") { // Browser JavaScript
+            return (new TextEncoder()).encode(atob(base64));
+        } else if (typeof Buffer !== "undefined") { // NodeJS
+            return Buffer.from(base64, "base64");
+        } else {
+            throw new PEMError("Unable to decode PEM data from Base-64.");
+        }
     }
 
-    public get preEncapsulationBoundary () : string {
-        return `-----BEGIN ${this.label}-----`;
-    }
-
-    public get postEncapsulationBoundary () : string {
-        return `-----END ${this.label}-----`;
+    public static encodeBase64 (data : Uint8Array) : string {
+        if (typeof TextDecoder !== "undefined") { // Browser JavaScript
+            return btoa((new TextDecoder("utf-8")).decode(data));
+        } else if (typeof Buffer !== "undefined") { // NodeJS
+            return (new Buffer(data)).toString("base64");
+        } else {
+            throw new PEMError("Unable to encode PEM data to Base-64.");
+        }
     }
 
     /**
@@ -85,18 +105,63 @@ class PEMObject {
             throw new PEMError("PEM label cannot begin or end with hyphen-minuses.");
     }
 
-    constructor() {
+    public static parse (text : string) : PEMObject[] {
+        let i : number = 0;
+        let match : RegExpExecArray | null;
+        let ret : PEMObject[] = [];
+        do {
+            match = PEMObject.pemObjectRegex.exec(text.slice(i));
+            if (match === null) break;
+            i += (match.index + match[0].length);
+            const next : PEMObject = new PEMObject();
+            next.decode(match[0]);
+            ret.push(next);
+        } while (i < text.length);
+        return ret;
+    }
 
+    private _label : string = "";
+
+    public get label () : string {
+        PEMObject.validateLabel(this._label);
+        return this._label;
+    }
+
+    public set label (value : string) {
+        PEMObject.validateLabel(value);
+        this._label = value;
+    }
+
+    public data : Uint8Array = new Uint8Array(0);
+
+    public get hasRFC7468CompliantLabel () : boolean {
+        // You don't really have to validate it in this case, so _label is used.
+        return rfc7468CompliantPEMLabels.includes(this._label);
+    }
+
+    public get preEncapsulationBoundary () : string {
+        return `-----BEGIN ${this.label}-----`;
+    }
+
+    public get postEncapsulationBoundary () : string {
+        return `-----END ${this.label}-----`;
+    }
+
+    constructor(label? : string, data? : string | Uint8Array) {
+        if (label !== undefined) this.label = label;
+        if (data !== undefined) {
+            if (typeof data === "string") {
+                this.data = PEMObject.decodeBase64(data);
+            } else {
+                this.data = data;
+            }
+        }
     }
 
     public decode (encoded : string) : void {
         const lines : string[] = encoded.trim().split("\n");
         if (lines.length <= 2)
             throw new PEMError("PEM is too small to be valid");
-
-        // while (lines[0].indexOf("-----BEGIN ") !== 0) lines.shift();
-        // if (lines.length === 0)
-        //     throw new PEMError("No PEM Pre-Encapsulation Boundary found.");
 
         // Pre-encapsulation Boundary parsing
         if (lines[0].indexOf("-----BEGIN ") !== 0)
@@ -126,31 +191,17 @@ class PEMObject {
 
         this.label = preEncapsulationBoundaryLabel;
 
-        lines.slice(1, (lines.length - 1)).forEach(line => {
-            if (line.match(/^\s*$/))
-                throw new PEMError("Blank lines detected within PEM data");
-        });
+        // lines.slice(1, (lines.length - 1)).forEach(line => {
+        //     if (line.match(/^\s*$/))
+        //         throw new PEMError("Blank lines detected within PEM data");
+        // });
         const base64data : string = lines.slice(1, (lines.length - 1)).join("");
-        if (typeof TextEncoder !== "undefined") { // Browser JavaScript
-            this.data = (new TextEncoder()).encode(atob(base64data));
-        } else if (typeof Buffer !== "undefined") { // NodeJS
-            this.data = Buffer.from(base64data, "base64");
-        } else {
-            throw new PEMError("Unable to decode PEM data from Base-64.");
-        }
+        this.data = PEMObject.decodeBase64(base64data);
     }
 
     public encode () : string {
-
         let ret : string[] = [ this.preEncapsulationBoundary ];
-        let base64data : string = "";
-        if (typeof TextDecoder !== "undefined") { // Browser JavaScript
-            base64data = btoa((new TextDecoder("utf-8")).decode(this.data));
-        } else if (typeof Buffer !== "undefined") { // NodeJS
-            base64data = (new Buffer(this.data)).toString("base64");
-        } else {
-            throw new PEMError("Unable to encode PEM data to Base-64.");
-        }
+        let base64data : string = PEMObject.encodeBase64(this.data);
         const stringSplitter : RegExp = new RegExp(".{1," + PEMObject.base64CharactersPerLine + "}", "g");
         ret = ret.concat(base64data.match(stringSplitter) || []);
         ret.push(this.postEncapsulationBoundary);

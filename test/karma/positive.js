@@ -54,7 +54,7 @@ describe('PEMObject', () => {
         expect(testPEM).toBe(testPEMBefore);
     });
 
-    it('encodes nullpotently', () => {
+    it('encodes nullipotently', () => {
         const testPEMBefore = testPEM;
         const pem = new PEMObject();
         pem.label = "CERTIFICATE";
