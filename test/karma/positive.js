@@ -62,16 +62,4 @@ describe('PEMObject', () => {
         expect(pem.encode()).toBe(pem.encode());
         expect(testPEM).toBe(testPEMBefore);
     });
-
-    it('honors the base64CharactersPerLine option', () => {
-        const testData = new Uint8Array([ 0x01, 0x02, 0x03, 0x04 ]);
-        const pem = new PEMObject();
-        pem.label = "CERTIFICATE";
-        pem.data = testData;
-        const originalBase64CharactersPerLine = PEMObject.base64CharactersPerLine;
-        PEMObject.base64CharactersPerLine = 1;
-        const encodedData = pem.encode();
-        PEMObject.base64CharactersPerLine = originalBase64CharactersPerLine;
-        expect(encodedData.match(/^\w$/mg).length).toBeGreaterThan(testData.length);
-    });
 });

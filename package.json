@@ -45,5 +45,5 @@
     "test": "karma run"
   },
   "types": "./dist/types/pem.d.ts",
-  "version": "0.2.0"
+  "version": "0.3.0"
 }

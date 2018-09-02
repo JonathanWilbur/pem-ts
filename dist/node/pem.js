@@ -156,10 +156,10 @@ class PEMObject {
         }
     }
     static decodeBase64(base64) {
-        if (typeof TextEncoder !== "undefined") {
+        if (TextEncoder !== undefined) {
             return (new TextEncoder()).encode(atob(base64));
         }
-        else if (typeof Buffer !== "undefined") {
+        else if (Buffer !== undefined) {
             return Buffer.from(base64, "base64");
         }
         else {
@@ -167,15 +167,41 @@ class PEMObject {
         }
     }
     static encodeBase64(data) {
-        if (typeof TextDecoder !== "undefined") {
+        if (TextDecoder !== undefined) {
             return btoa((new TextDecoder("utf-8")).decode(data));
         }
-        else if (typeof Buffer !== "undefined") {
+        else if (Buffer !== undefined) {
             return (new Buffer(data)).toString("base64");
         }
         else {
             throw new PEMError("Unable to encode PEM data to Base-64.");
         }
+    }
+    static validateLabel(label) {
+        if (!label.match(/^[A-Z# ]*$/))
+            throw new PEMError("Malformed PEM label.");
+        if (label.match(/\s\s/))
+            throw new PEMError("PEM label cannot contain consecutive spaces.");
+        if (label.match(/--/))
+            throw new PEMError("PEM label cannot contain consecutive hyphen-minuses.");
+        if (label.match(/^\s+/) || label.match(/\s+$/))
+            throw new PEMError("PEM label cannot begin or end with spaces.");
+        if (label.match(/^\-+/) || label.match(/\-+$/))
+            throw new PEMError("PEM label cannot begin or end with hyphen-minuses.");
+    }
+    static parse(text) {
+        let i = 0;
+        let match;
+        let ret = [];
+        do {
+            match = PEMObject.pemObjectRegex.exec(text.slice(i));
+            if (match === null)
+                break;
+            i += (match.index + 1);
+            const next = new PEMObject(match[1], match[2]);
+            ret.push(next);
+        } while (i < text.length);
+        return ret;
     }
     get label() {
         PEMObject.validateLabel(this._label);
@@ -194,35 +220,8 @@ class PEMObject {
     get postEncapsulationBoundary() {
         return `-----END ${this.label}-----`;
     }
-    static validateLabel(label) {
-        if (!label.match(/^[A-Z# ]*$/g))
-            throw new PEMError("Malformed PEM label.");
-        if (label.match(/\s\s/g))
-            throw new PEMError("PEM label cannot contain consecutive spaces.");
-        if (label.match(/--/g))
-            throw new PEMError("PEM label cannot contain consecutive hyphen-minuses.");
-        if (label.match(/^\s+/g) || label.match(/\s+$/g))
-            throw new PEMError("PEM label cannot begin or end with spaces.");
-        if (label.match(/^\-+/g) || label.match(/\-+$/g))
-            throw new PEMError("PEM label cannot begin or end with hyphen-minuses.");
-    }
-    static parse(text) {
-        let i = 0;
-        let match;
-        let ret = [];
-        do {
-            match = PEMObject.pemObjectRegex.exec(text.slice(i));
-            if (match === null)
-                break;
-            i += (match.index + match[0].length);
-            const next = new PEMObject();
-            next.decode(match[0]);
-            ret.push(next);
-        } while (i < text.length);
-        return ret;
-    }
     decode(encoded) {
-        const lines = encoded.trim().split("\n");
+        const lines = encoded.trim().replace("\r", "").split("\n");
         if (lines.length <= 2)
             throw new PEMError("PEM is too small to be valid");
         if (lines[0].indexOf("-----BEGIN ") !== 0)
@@ -238,13 +237,23 @@ class PEMObject {
         if (preEncapsulationBoundaryLabel !== postEncapsulationBoundaryLabel)
             throw new PEMError("PEM object Pre-encapsulation Boundary label does not match Post-encapsulation Boundary label.");
         this.label = preEncapsulationBoundaryLabel;
-        const base64data = lines.slice(1, (lines.length - 1)).join("");
+        let firstNonBlankBase64Line = 1;
+        while (firstNonBlankBase64Line < (lines.length - 1)) {
+            if (!lines[firstNonBlankBase64Line].match(/^\s*$/))
+                break;
+            firstNonBlankBase64Line++;
+        }
+        lines.slice(firstNonBlankBase64Line, (lines.length - 1)).forEach(line => {
+            if (line.match(/^\s*$/))
+                throw new PEMError("Blank lines detected within PEM data");
+        });
+        const base64data = lines.slice(1, (lines.length - 1)).join("").replace(/\s+/g, "");
         this.data = PEMObject.decodeBase64(base64data);
     }
     encode() {
         let ret = [this.preEncapsulationBoundary];
         let base64data = PEMObject.encodeBase64(this.data);
-        const stringSplitter = new RegExp(".{1," + PEMObject.base64CharactersPerLine + "}", "g");
+        const stringSplitter = new RegExp(".{1,64}", "g");
         ret = ret.concat(base64data.match(stringSplitter) || []);
         ret.push(this.postEncapsulationBoundary);
         return ret.join("\n");
@@ -252,13 +261,12 @@ class PEMObject {
 }
 PEMObject.preEncapsulationBoundaryRegex = /^-----BEGIN (?<prelabel>[A-Z# ]*)-----$/m;
 PEMObject.postEncapsulationBoundaryRegex = /^-----END (?<postlabel>[A-Z# ]*)-----$/m;
-PEMObject.base64LineRegex = /^[A-Za-z0-9\+/=]+$/mg;
+PEMObject.base64LineRegex = /^[A-Za-z0-9\+/=]+\s*$/mg;
 PEMObject.pemObjectRegex = new RegExp(PEMObject.preEncapsulationBoundaryRegex.source +
     "\n(?:\\s*\n)*(?<base64>(?:" +
     PEMObject.base64LineRegex.source +
     "\n)*)?" +
-    PEMObject.postEncapsulationBoundaryRegex.source, "mg");
-PEMObject.base64CharactersPerLine = 64;
+    PEMObject.postEncapsulationBoundaryRegex.source, "m");
 
 
 /***/ })
