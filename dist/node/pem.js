@@ -220,6 +220,11 @@ class PEMObject {
     get postEncapsulationBoundary() {
         return `-----END ${this.label}-----`;
     }
+    get encapsulatedTextPortion() {
+        const base64data = PEMObject.encodeBase64(this.data);
+        const stringSplitter = /.{1,64}/g;
+        return (base64data.match(stringSplitter) || []).join("\n");
+    }
     decode(encoded) {
         const lines = encoded.trim().replace("\r", "").split("\n");
         if (lines.length <= 2)
@@ -250,13 +255,10 @@ class PEMObject {
         const base64data = lines.slice(1, (lines.length - 1)).join("").replace(/\s+/g, "");
         this.data = PEMObject.decodeBase64(base64data);
     }
-    encode() {
-        let ret = [this.preEncapsulationBoundary];
-        let base64data = PEMObject.encodeBase64(this.data);
-        const stringSplitter = new RegExp(".{1,64}", "g");
-        ret = ret.concat(base64data.match(stringSplitter) || []);
-        ret.push(this.postEncapsulationBoundary);
-        return ret.join("\n");
+    get encoded() {
+        return (this.preEncapsulationBoundary + "\n" +
+            this.encapsulatedTextPortion + "\n" +
+            this.postEncapsulationBoundary);
     }
 }
 PEMObject.preEncapsulationBoundaryRegex = /^-----BEGIN (?<prelabel>[A-Z# ]*)-----$/m;

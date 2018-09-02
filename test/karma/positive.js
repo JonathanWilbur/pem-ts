@@ -35,7 +35,7 @@ describe('PEMObject', () => {
         const pem = new PEMObject();
         pem.label = "CERTIFICATE";
         pem.data = originalData;
-        pem.decode(pem.encode());
+        pem.decode(pem.encoded);
         expect(pem.data).toEqual(originalData);
     });
 
@@ -43,7 +43,7 @@ describe('PEMObject', () => {
         const pem = new PEMObject();
         pem.label = "CERTIFICATE";
         pem.decode(testPEM);
-        expect(pem.encode()).toEqual(testPEM);
+        expect(pem.encoded).toEqual(testPEM);
     });
 
     it('decodes without affecting the input PEM string', () => {
@@ -59,7 +59,7 @@ describe('PEMObject', () => {
         const pem = new PEMObject();
         pem.label = "CERTIFICATE";
         pem.decode(testPEM);
-        expect(pem.encode()).toBe(pem.encode());
+        expect(pem.encoded).toBe(pem.encoded);
         expect(testPEM).toBe(testPEMBefore);
     });
 });

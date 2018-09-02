@@ -131,6 +131,12 @@ class PEMObject {
         return `-----END ${this.label}-----`;
     }
 
+    public get encapsulatedTextPortion () : string {
+        const base64data : string = PEMObject.encodeBase64(this.data);
+        const stringSplitter : RegExp = /.{1,64}/g;
+        return (base64data.match(stringSplitter) || []).join("\n");
+    }
+
     constructor(label? : string, data? : string | Uint8Array) {
         if (label !== undefined) this.label = label;
         if (data !== undefined) {
@@ -195,13 +201,12 @@ class PEMObject {
         this.data = PEMObject.decodeBase64(base64data);
     }
 
-    public encode () : string {
-        let ret : string[] = [ this.preEncapsulationBoundary ];
-        let base64data : string = PEMObject.encodeBase64(this.data);
-        const stringSplitter : RegExp = new RegExp(".{1,64}", "g");
-        ret = ret.concat(base64data.match(stringSplitter) || []);
-        ret.push(this.postEncapsulationBoundary);
-        return ret.join("\n");
+    public get encoded () : string {
+        return (
+            this.preEncapsulationBoundary + "\n" +
+            this.encapsulatedTextPortion + "\n" +
+            this.postEncapsulationBoundary
+        );
     }
 
 }
