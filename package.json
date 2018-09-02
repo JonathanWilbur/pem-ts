@@ -29,6 +29,9 @@
   "directories": {
     "test": "test"
   },
+  "engines": {
+    "node": ">=10.3.0"
+  },
   "homepage": "https://github.com/JonathanWilbur/pem-ts#readme",
   "keywords": [
     "PEM"
@@ -45,5 +48,5 @@
     "test": "karma run"
   },
   "types": "./dist/types/pem.d.ts",
-  "version": "0.4.0"
+  "version": "1.0.0"
 }

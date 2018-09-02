@@ -51,20 +51,20 @@ class PEMObject {
             "m"
         );
 
-    public static decodeBase64 (base64 : string) : Uint8Array {
-        if (TextEncoder !== undefined) { // Browser JavaScript
+    protected static decodeBase64 (base64 : string) : Uint8Array {
+        if (typeof TextEncoder !== "undefined") { // Browser JavaScript
             return (new TextEncoder()).encode(atob(base64));
-        } else if (Buffer !== undefined) { // NodeJS
+        } else if (typeof Buffer !== "undefined") { // NodeJS
             return Buffer.from(base64, "base64");
         } else {
             throw new PEMError("Unable to decode PEM data from Base-64.");
         }
     }
 
-    public static encodeBase64 (data : Uint8Array) : string {
-        if (TextDecoder !== undefined) { // Browser JavaScript
+    protected static encodeBase64 (data : Uint8Array) : string {
+        if (typeof TextDecoder !== "undefined") { // Browser JavaScript
             return btoa((new TextDecoder("utf-8")).decode(data));
-        } else if (Buffer !== undefined) { // NodeJS
+        } else if (typeof Buffer !== "undefined") { // NodeJS
             return (new Buffer(data)).toString("base64");
         } else {
             throw new PEMError("Unable to encode PEM data to Base-64.");

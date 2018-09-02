@@ -156,10 +156,10 @@ class PEMObject {
         }
     }
     static decodeBase64(base64) {
-        if (TextEncoder !== undefined) {
+        if (typeof TextEncoder !== "undefined") {
             return (new TextEncoder()).encode(atob(base64));
         }
-        else if (Buffer !== undefined) {
+        else if (typeof Buffer !== "undefined") {
             return Buffer.from(base64, "base64");
         }
         else {
@@ -167,10 +167,10 @@ class PEMObject {
         }
     }
     static encodeBase64(data) {
-        if (TextDecoder !== undefined) {
+        if (typeof TextDecoder !== "undefined") {
             return btoa((new TextDecoder("utf-8")).decode(data));
         }
-        else if (Buffer !== undefined) {
+        else if (typeof Buffer !== "undefined") {
             return (new Buffer(data)).toString("base64");
         }
         else {

@@ -56,7 +56,7 @@ all_declaration_paths = $(module_declaration_paths)
 web_libraries : web_$(PACKAGE_SLUG)
 
 web_$(PACKAGE_SLUG) : $(DESTDIR)/web/$(PACKAGE_SLUG).js
-$(DESTDIR)/web/$(PACKAGE_SLUG).js : $(all_source_paths)
+$(DESTDIR)/web/$(PACKAGE_SLUG).js : $(all_source_paths) $(SRCDIR)/build/webpack/web/$(PACKAGE_SLUG).webpack.js
 	webpack \
 	--config $(SRCDIR)/build/webpack/web/$(PACKAGE_SLUG).webpack.js \
 	--output-path $(abspath $(DESTDIR))/web
@@ -64,14 +64,14 @@ $(DESTDIR)/web/$(PACKAGE_SLUG).js : $(all_source_paths)
 node_libraries : node_$(PACKAGE_SLUG)
 
 node_$(PACKAGE_SLUG) : $(DESTDIR)/node/$(PACKAGE_SLUG).js
-$(DESTDIR)/node/$(PACKAGE_SLUG).js : $(all_source_paths)
+$(DESTDIR)/node/$(PACKAGE_SLUG).js : $(all_source_paths) $(SRCDIR)/build/webpack/node/$(PACKAGE_SLUG).webpack.js
 	webpack \
 	--config $(SRCDIR)/build/webpack/node/$(PACKAGE_SLUG).webpack.js \
 	--output-path $(abspath $(DESTDIR))/node
 
 declarations : $(all_declaration_paths)
 
-$(all_dec_paths) : $(DESTDIR)/types/%.d.ts : $(SRCDIR)/source/%.ts
+$(all_declaration_paths) : $(DESTDIR)/types/%.d.ts : $(SRCDIR)/source/%.ts
 	tsc \
 	--declaration \
 	--emitDeclarationOnly \
