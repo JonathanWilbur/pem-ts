@@ -51,5 +51,8 @@
     "test": "karma run"
   },
   "types": "./dist/types/pem.d.ts",
-  "version": "1.0.3"
+  "version": "1.0.3",
+  "dependencies": {
+    "base64-ts": "^1.0.2"
+  }
 }

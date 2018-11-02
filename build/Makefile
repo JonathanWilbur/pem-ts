@@ -75,6 +75,7 @@ $(all_declaration_paths) : $(DESTDIR)/types/%.d.ts : $(SRCDIR)/source/%.ts
 	tsc \
 	--declaration \
 	--emitDeclarationOnly \
+	--moduleResolution node \
 	--target ESNext \
 	--lib ESNext,DOM \
 	--declarationDir ./dist/types $<

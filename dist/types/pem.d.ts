@@ -7,8 +7,6 @@ export declare class PEMObject {
     static readonly postEncapsulationBoundaryRegex: RegExp;
     static readonly base64LineRegex: RegExp;
     static readonly pemObjectRegex: RegExp;
-    protected static decodeBase64(base64: string): Uint8Array;
-    protected static encodeBase64(data: Uint8Array): string;
     /**
      * From RFC 7468:
      * "Labels are formally case-sensitive, uppercase, and comprised of zero or more

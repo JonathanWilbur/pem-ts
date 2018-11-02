@@ -1,3 +1,5 @@
+import { decode as base64Decode, encode as base64Encode } from "base64-ts";
+
 export
 const rfc7468CompliantPEMLabels : string[] = [
     "X509 CERTIFICATE",
@@ -50,26 +52,6 @@ class PEMObject {
             PEMObject.postEncapsulationBoundaryRegex.source,
             "m"
         );
-
-    protected static decodeBase64 (base64 : string) : Uint8Array {
-        if (typeof TextEncoder !== "undefined") { // Browser JavaScript
-            return (new TextEncoder()).encode(atob(base64));
-        } else if (typeof Buffer !== "undefined") { // NodeJS
-            return Buffer.from(base64, "base64");
-        } else {
-            throw new PEMError("Unable to decode PEM data from Base-64.");
-        }
-    }
-
-    protected static encodeBase64 (data : Uint8Array) : string {
-        if (typeof TextDecoder !== "undefined") { // Browser JavaScript
-            return btoa((new TextDecoder("utf-8")).decode(data));
-        } else if (typeof Buffer !== "undefined") { // NodeJS
-            return (new Buffer(data)).toString("base64");
-        } else {
-            throw new PEMError("Unable to encode PEM data to Base-64.");
-        }
-    }
 
     /**
      * From RFC 7468:
@@ -132,7 +114,7 @@ class PEMObject {
     }
 
     public get encapsulatedTextPortion () : string {
-        const base64data : string = PEMObject.encodeBase64(this.data);
+        const base64data : string = base64Encode(this.data);
         const stringSplitter : RegExp = /.{1,64}/g;
         return (base64data.match(stringSplitter) || []).join("\n");
     }
@@ -141,7 +123,7 @@ class PEMObject {
         if (label !== undefined) this.label = label;
         if (data !== undefined) {
             if (typeof data === "string") {
-                this.data = PEMObject.decodeBase64(data);
+                this.data = base64Decode(data);
             } else {
                 this.data = data;
             }
@@ -198,7 +180,7 @@ class PEMObject {
         });
 
         const base64data : string = lines.slice(1, (lines.length - 1)).join("").replace(/\s+/g, "");
-        this.data = PEMObject.decodeBase64(base64data);
+        this.data = base64Decode(base64data);
     }
 
     public get encoded () : string {
