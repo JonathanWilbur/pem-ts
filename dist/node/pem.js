@@ -356,12 +356,17 @@ function paddingLengthOf(base64, encodingLength) {
         throw new Error("Base64 encoding length must be integral.");
     return ((encodingLength === base64.length) ? 0 : (4 - (encodingLength % 4)));
 }
+function lengthOfEncodedDataIn(base64) {
+    const encodingLength = encodingLengthOf(base64);
+    const paddingLength = paddingLengthOf(base64, encodingLength);
+    return (((encodingLength + paddingLength) * 0.75) - paddingLength);
+}
 function decode(base64) {
     if (base64.length % 4 > 0)
         throw new Error("Base64 string with length not divisible by four.");
     const encodingLength = encodingLengthOf(base64);
     const paddingLength = paddingLengthOf(base64, encodingLength);
-    const ret = new Uint8Array(encodingLength);
+    const ret = new Uint8Array(lengthOfEncodedDataIn(base64));
     let currentByte = 0;
     const fullQuartetsLength = (paddingLength ? (encodingLength - 4) : encodingLength);
     let temp = 0;
