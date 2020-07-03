@@ -20,8 +20,6 @@ overrides:
     rules:
       no-undef:
         - off
-      no-magic-numbers:
-        - off
 parser: '@typescript-eslint/parser'
 parserOptions:
   ecmaVersion: 2018
@@ -90,8 +88,6 @@ rules:
     - error
   no-loop-func:
     - error
-  no-magic-numbers:
-    - warn
   no-multi-str:
     - error
   no-new:
@@ -136,7 +132,7 @@ rules:
   require-await:
     - off
   require-unicode-regexp:
-    - warn
+    - off
   no-label-var:
     - warn
   no-shadow:

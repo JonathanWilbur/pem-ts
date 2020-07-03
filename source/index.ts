@@ -1,4 +1,3 @@
-// import { decode as base64Decode, encode as base64Encode } from "base64-ts";
 import { fromByteArray as base64Encode, toByteArray as base64Decode } from "base64-js";
 
 export
@@ -60,7 +59,7 @@ class PEMObject {
      * nor do they contain spaces or hyphen-minuses at either end."
      */
     public static validateLabel (label: string): void {
-        if (!label.match(/^[A-Z# ]*$/)) throw new PEMError("Malformed PEM label.");
+        if (!label.match(/^[A-Z#0-9 ]*$/)) throw new PEMError("Malformed PEM label.");
         if (label.match(/\s\s/)) throw new PEMError("PEM label cannot contain consecutive spaces.");
         if (label.match(/--/)) throw new PEMError("PEM label cannot contain consecutive hyphen-minuses.");
         if (label.match(/^\s+/) || label.match(/\s+$/)) throw new PEMError("PEM label cannot begin or end with spaces.");
