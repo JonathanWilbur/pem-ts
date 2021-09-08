@@ -45,11 +45,11 @@ class PEMObject {
     public static readonly pemObjectRegex: RegExp =
         new RegExp(
             PEMObject.preEncapsulationBoundaryRegex.source
-            + "\n(?:\\s*\n)*((?:"
+            + "\r?\n(?:\\s*\r?\n)*((?:"
             + PEMObject.base64LineRegex.source
-            + "\n)*)?"
+            + "\r?\n)*)?"
             + PEMObject.postEncapsulationBoundaryRegex.source,
-            "m"
+            "m",
         );
 
     /**
