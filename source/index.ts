@@ -39,11 +39,11 @@ class PEMError extends Error {
 
 export
 class PEMObject {
-    public static readonly preEncapsulationBoundaryRegex: RegExp = /^-----BEGIN ([A-Z# ]*)-----$/m;
-    public static readonly postEncapsulationBoundaryRegex: RegExp = /^-----END ([A-Z# ]*)-----$/m;
-    public static readonly base64LineRegex: RegExp = /^[A-Za-z0-9\+/=]+\s*$/mg;
-    public static readonly pemObjectRegex: RegExp =
-        new RegExp(
+    public static readonly preEncapsulationBoundaryRegex: RegExp = /^-----BEGIN ([ \x21-\x7e]+)-----$/m;
+    public static readonly postEncapsulationBoundaryRegex: RegExp = /^-----END ([ \x21-\x7e]+)-----$/m;
+    public static readonly base64LineRegex: RegExp = /^[A-Za-z0-9+/=]+\s*$/mg;
+    public static readonly pemObjectRegex: RegExp
+        = new RegExp(
             PEMObject.preEncapsulationBoundaryRegex.source
             + "\r?\n(?:\\s*\r?\n)*((?:"
             + PEMObject.base64LineRegex.source
@@ -62,8 +62,12 @@ class PEMObject {
         if (!label.match(/^[A-Z#0-9 ]*$/)) throw new PEMError("Malformed PEM label.");
         if (label.match(/\s\s/)) throw new PEMError("PEM label cannot contain consecutive spaces.");
         if (label.match(/--/)) throw new PEMError("PEM label cannot contain consecutive hyphen-minuses.");
-        if (label.match(/^\s+/) || label.match(/\s+$/)) throw new PEMError("PEM label cannot begin or end with spaces.");
-        if (label.match(/^\-+/) || label.match(/\-+$/)) throw new PEMError("PEM label cannot begin or end with hyphen-minuses.");
+        if (label.match(/^\s+/) || label.match(/\s+$/)) {
+            throw new PEMError("PEM label cannot begin or end with spaces.");
+        }
+        if (label.match(/^-+/) || label.match(/-+$/)) {
+            throw new PEMError("PEM label cannot begin or end with hyphen-minuses.");
+        }
     }
 
     public static parse (text: string): PEMObject[] {
@@ -134,9 +138,14 @@ class PEMObject {
         const preEncapsulationBoundaryLabel: string = lines[0].slice(11, (lines[0].length - 5));
 
         // Post-encapsulation Boundary parsing
-        if (lines[(lines.length - 1)].indexOf("-----END ") !== 0) throw new PEMError("Last line of PEM object did not start with '-----END '");
-        if (!lines[(lines.length - 1)].endsWith("-----")) throw new PEMError("Last line of PEM object did not end with '-----'");
-        const postEncapsulationBoundaryLabel: string = lines[(lines.length - 1)].slice(9, (lines[(lines.length - 1)].length - 5));
+        if (lines[(lines.length - 1)].indexOf("-----END ") !== 0) {
+            throw new PEMError("Last line of PEM object did not start with '-----END '");
+        }
+        if (!lines[(lines.length - 1)].endsWith("-----")) {
+            throw new PEMError("Last line of PEM object did not end with '-----'");
+        }
+        const postEncapsulationBoundaryLabel: string
+            = lines[(lines.length - 1)].slice(9, (lines[(lines.length - 1)].length - 5));
 
         /**
          * From RFC 7468:
@@ -147,7 +156,11 @@ class PEMObject {
          * This library will not skip this validation, for now, though it is
          * permissible to do so in the future.
          */
-        if (preEncapsulationBoundaryLabel !== postEncapsulationBoundaryLabel) throw new PEMError("PEM object Pre-encapsulation Boundary label does not match Post-encapsulation Boundary label.");
+        if (preEncapsulationBoundaryLabel !== postEncapsulationBoundaryLabel) {
+            throw new PEMError(
+                "PEM object Pre-encapsulation Boundary label does not match Post-encapsulation Boundary label.",
+            );
+        }
 
         this.label = preEncapsulationBoundaryLabel;
 

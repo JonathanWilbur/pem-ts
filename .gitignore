@@ -4,7 +4,6 @@ rubbish/
 junit.xml
 
 # Private keys, wallets, and other sensitive items.
-*.pem
 *.der
 *.key
 *.privkey
