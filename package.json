@@ -54,7 +54,7 @@
         "test": "npx jest --ci --reporters=default --reporters=jest-junit"
     },
     "types": "./dist/index.d.ts",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "dependencies": {
         "base64-js": "^1.5.1"
     }
