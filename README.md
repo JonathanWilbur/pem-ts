@@ -2,7 +2,8 @@
 
 [![JSR](https://jsr.io/badges/@wildboar/pem)](https://jsr.io/@wildboar/pem)
 
-This module is published both on [npmjs.com] and [jsr.io].
+This module is published both on [npmjs.com](https://npmjs.com) and
+[jsr.io](https://jsr.io).
 
 ## ESM Notice
 

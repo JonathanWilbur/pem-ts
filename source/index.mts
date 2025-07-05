@@ -1,17 +1,38 @@
 import { encodeBase64, decodeBase64 } from "@std/encoding";
 
-export
-class PEMError extends Error {
+/**
+ * An error thrown when a PEM object is malformed.
+ */
+export class PEMError extends Error {
+    /**
+     * Create a new PEMError.
+     * @param m The message to display.
+     * @class PEMError
+     */
     constructor (m: string) {
         super(m);
     }
 }
 
-export
-class PEMObject {
+/**
+ * A PEM object.
+ */
+export class PEMObject {
+    /**
+     * The regular expression to match the pre-encapsulation boundary.
+     */
     public static readonly preEncapsulationBoundaryRegex: RegExp = /^-----BEGIN ([ \x21-\x7e]+)-----$/m;
+    /**
+     * The regular expression to match the post-encapsulation boundary.
+     */
     public static readonly postEncapsulationBoundaryRegex: RegExp = /^-----END ([ \x21-\x7e]+)-----$/m;
+    /**
+     * The regular expression to match a base64 line.
+     */
     public static readonly base64LineRegex: RegExp = /^[A-Za-z0-9+/=]+\s*$/mg;
+    /**
+     * The regular expression to match a PEM object.
+     */
     public static readonly pemObjectRegex: RegExp
         = new RegExp(
             PEMObject.preEncapsulationBoundaryRegex.source
@@ -40,6 +61,13 @@ class PEMObject {
         }
     }
 
+    /**
+     * Parse one or more PEM object from a string.
+     * @param text The string to parse.
+     * @returns The PEM object.
+     * @static
+     * @method
+     */
     public static parse (text: string): PEMObject[] {
         let i: number = 0;
         let match: RegExpExecArray | null;
@@ -54,24 +82,42 @@ class PEMObject {
         return ret;
     }
 
+    /**
+     * The label of the PEM object.
+     */
     private _label: string = "";
 
+    /**
+     * Get the label of the PEM object.
+     */
     public get label (): string {
         PEMObject.validateLabel(this._label);
         return this._label;
     }
 
+    /**
+     * Set the label of the PEM object.
+     */
     public set label (value: string) {
         PEMObject.validateLabel(value);
         this._label = value;
     }
 
+    /**
+     * The binary data of the PEM object.
+     */
     public data: Uint8Array = new Uint8Array(0);
 
+    /**
+     * Get the pre-encapsulation boundary of the PEM object.
+     */
     public get preEncapsulationBoundary (): string {
         return `-----BEGIN ${this.label}-----`;
     }
 
+    /**
+     * Get the post-encapsulation boundary of the PEM object.
+     */
     public get postEncapsulationBoundary (): string {
         return `-----END ${this.label}-----`;
     }
@@ -82,6 +128,12 @@ class PEMObject {
         return (base64data.match(stringSplitter) || []).join("\n");
     }
 
+    /**
+     * Create a new PEM object.
+     * @param label The label of the PEM object.
+     * @param data The data of the PEM object.
+     * @class PEMObject
+     */
     constructor (label? : string, data? : string | Uint8Array) {
         if (label !== undefined) this.label = label;
         if (data !== undefined) {
@@ -93,6 +145,11 @@ class PEMObject {
         }
     }
 
+    /**
+     * Decode a single PEM object from a string.
+     * @param encoded The string to decode.
+     * @method
+     */
     public decode (encoded: string): void {
         const lines: string[] = encoded.trim().replace("\r", "").split("\n");
         if (lines.length <= 2) throw new PEMError("PEM is too small to be valid");
@@ -148,11 +205,21 @@ class PEMObject {
         this.data = decodeBase64(base64data);
     }
 
+    /**
+     * Get the encoded string of the PEM object.
+     */
     public get encoded (): string {
         return (
             this.preEncapsulationBoundary + "\n"
             + this.encapsulatedTextPortion + "\n"
             + this.postEncapsulationBoundary
         );
+    }
+
+    /**
+     * Get the string representation of the PEM object.
+     */
+    public toString(): string {
+        return this.encoded;
     }
 }
