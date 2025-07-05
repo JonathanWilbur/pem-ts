@@ -1,150 +1,9 @@
-const PEMObject = require("../../dist/index.js").PEMObject;
-const base64 = require("base64-js");
+import { PEMObject } from "../dist/index.mjs";
+import { describe, it } from "node:test";
+import { strict as assert } from "node:assert";
 
-const decodedCert = base64.toByteArray("MIICUTCCAfugAwIBAgIBADANBgkqhkiG9w0BAQQFADBXMQswCQYDVQQGEwJDTjELMAkGA1UECBMCUE4xCzAJBgNVBAcTAkNOMQswCQYDVQQKEwJPTjELMAkGA1UECxMCVU4xFDASBgNVBAMTC0hlcm9uZyBZYW5nMB4XDTA1MDcxNTIxMTk0N1oXDTA1MDgxNDIxMTk0N1owVzELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAlBOMQswCQYDVQQHEwJDTjELMAkGA1UEChMCT04xCzAJBgNVBAsTAlVOMRQwEgYDVQQDEwtIZXJvbmcgWWFuZzBcMA0GCSqGSIb3DQEBAQUAA0sAMEgCQQCp5hnG7ogBhtlynpOS21cBewKE/B7jV14qeyslnr26xZUsSVko36ZnhiaO/zbMOoRcKK9vEcgMtcLFuQTWDl3RAgMBAAGjgbEwga4wHQYDVR0OBBYEFFXI70krXeQDxZgbaCQoR4jUDncEMH8GA1UdIwR4MHaAFFXI70krXeQDxZgbaCQoR4jUDncEoVukWTBXMQswCQYDVQQGEwJDTjELMAkGA1UECBMCUE4xCzAJBgNVBAcTAkNOMQswCQYDVQQKEwJPTjELMAkGA1UECxMCVU4xFDASBgNVBAMTC0hlcm9uZyBZYW5nggEAMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADQQA/ugzBrjjK9jcWnDVfGHlk3icNRq0oV7Ri32z/+HQX67aRfgZu7KWdI+JuWm7DCfrPNGVwFWUQOmsPue9rZBgO");
-
-// = new Uint8Array([
-//     0x30, 0xEF, 0xBF, 0xBD, 0x02, 0x51, 0x30, 0xEF, 0xBF, 0xBD, 0x01, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF,
-//     0xBD, 0x03, 0x02, 0x01, 0x02, 0x02, 0x01, 0x00, 0x30,
-//     0x06, 0x09, 0x2A, 0xEF, 0xBF, 0xBD, 0x48, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD,
-//     0x01, 0x01, 0x04, 0x05, 0x00, 0x30, 0x57, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x06,
-//     0x13, 0x02, 0x43, 0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x08, 0x13, 0x02, 0x50,
-//     0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x07, 0x13, 0x02, 0x43, 0x4E, 0x31, 0x0B,
-//     0x30, 0x09, 0x06, 0x03, 0x55, 0x04,
-//     0x13, 0x02, 0x4F, 0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x0B, 0x13, 0x02, 0x55,
-//     0x4E, 0x31, 0x14, 0x30, 0x12, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x0B, 0x48, 0x65, 0x72, 0x6F,
-//     0x6E, 0x67, 0x20, 0x59, 0x61, 0x6E, 0x67, 0x30, 0x1E, 0x17,
-//     0x30, 0x35, 0x30, 0x37, 0x31, 0x35, 0x32, 0x31, 0x31, 0x39, 0x34, 0x37, 0x5A, 0x17,
-//     0x30, 0x35, 0x30, 0x38, 0x31, 0x34, 0x32, 0x31, 0x31, 0x39, 0x34, 0x37, 0x5A, 0x30, 0x57, 0x31,
-//     0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x06, 0x13, 0x02, 0x43, 0x4E, 0x31, 0x0B, 0x30, 0x09,
-//     0x06, 0x03, 0x55, 0x04, 0x08, 0x13, 0x02, 0x50, 0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55,
-//     0x04, 0x07, 0x13, 0x02, 0x43, 0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04,
-//     0x13, 0x02, 0x4F, 0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x0B, 0x13, 0x02, 0x55,
-//     0x4E, 0x31, 0x14, 0x30, 0x12, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x0B, 0x48, 0x65, 0x72, 0x6F,
-//     0x6E, 0x67, 0x20, 0x59, 0x61, 0x6E, 0x67, 0x30, 0x5C, 0x30,
-//     0x06, 0x09, 0x2A, 0xEF, 0xBF, 0xBD, 0x48, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD,
-//     0x01, 0x01, 0x01, 0x05, 0x00, 0x03, 0x4B, 0x00, 0x30, 0x48, 0x02, 0x41, 0x00, 0xEF, 0xBF, 0xBD,
-//     0xEF, 0xBF, 0xBD, 0x19, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x01, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF,
-//     0xBD, 0x72, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x57, 0x01,
-//     0x7B, 0x02, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x1E, 0xEF, 0xBF, 0xBD, 0x57, 0x5E, 0x2A, 0x7B,
-//     0x2B, 0x25, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xC5, 0x95, 0x2C, 0x49, 0x59,
-//     0x28, 0xDF, 0xA6, 0x67, 0xEF, 0xBF, 0xBD, 0x26, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x36, 0xEF,
-//     0xBF, 0xBD, 0x3A, 0xEF, 0xBF, 0xBD, 0x5C, 0x28, 0xEF, 0xBF, 0xBD, 0x6F, 0x11, 0xEF, 0xBF, 0xBD,
-//     0x0C, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xC5, 0xB9, 0x04, 0xEF, 0xBF, 0xBD, 0x0E, 0x5D, 0xEF,
-//     0xBF, 0xBD, 0x02, 0x03, 0x01, 0x00, 0x01, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD,
-//     0x30, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x30, 0x1D, 0x06, 0x03, 0x55, 0x1D, 0x0E, 0x04, 0x16,
-//     0x04, 0x14, 0x55, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x49, 0x2B, 0x5D, 0xEF, 0xBF, 0xBD, 0x03,
-//     0xC5, 0x98, 0x1B, 0x68, 0x24, 0x28, 0x47, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x0E, 0x77, 0x04,
-//     0x30, 0x7F, 0x06, 0x03, 0x55, 0x1D, 0x23, 0x04, 0x78, 0x30, 0x76, 0xEF, 0xBF, 0xBD, 0x14, 0x55,
-//     0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x49, 0x2B, 0x5D, 0xEF, 0xBF, 0xBD, 0x03, 0xC5, 0x98, 0x1B,
-//     0x68, 0x24, 0x28, 0x47, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x0E, 0x77, 0x04, 0xEF, 0xBF, 0xBD,
-//     0x5B, 0xEF, 0xBF, 0xBD, 0x59, 0x30, 0x57, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x06,
-//     0x13, 0x02, 0x43, 0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x08, 0x13, 0x02, 0x50,
-//     0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x07, 0x13, 0x02, 0x43, 0x4E, 0x31, 0x0B,
-//     0x30, 0x09, 0x06, 0x03, 0x55, 0x04,
-//     0x13, 0x02, 0x4F, 0x4E, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x0B, 0x13, 0x02, 0x55,
-//     0x4E, 0x31, 0x14, 0x30, 0x12, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x0B, 0x48, 0x65, 0x72, 0x6F,
-//     0x6E, 0x67, 0x20, 0x59, 0x61, 0x6E, 0x67, 0xEF, 0xBF, 0xBD, 0x01, 0x00, 0x30, 0x0C, 0x06, 0x03,
-//     0x55, 0x1D, 0x13, 0x04, 0x05, 0x30, 0x03, 0x01, 0x01, 0xEF, 0xBF, 0xBD, 0x30,
-//     0x06, 0x09, 0x2A, 0xEF, 0xBF, 0xBD, 0x48, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD,
-//     0x01, 0x01, 0x04, 0x05, 0x00, 0x03, 0x41, 0x00, 0x3F, 0xEF, 0xBF, 0xBD, 0x0C, 0xEF, 0xBF, 0xBD,
-//     0xEF, 0xBF, 0xBD, 0x38, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x37, 0x16, 0xEF, 0xBF, 0xBD, 0x35,
-//     0x5F, 0x18, 0x79, 0x64, 0xEF, 0xBF, 0xBD, 0x27,
-//     0x46, 0xEF, 0xBF, 0xBD, 0x28, 0x57, 0xEF, 0xBF, 0xBD, 0x62, 0xEF, 0xBF, 0xBD, 0x6C, 0xEF, 0xBF,
-//     0xBD, 0xEF, 0xBF, 0xBD, 0x74, 0x17, 0xEB, 0xB6, 0x91, 0x7E, 0x06, 0x6E, 0xEC, 0xA5, 0x9D, 0x23,
-//     0xEF, 0xBF, 0xBD, 0x6E, 0x5A, 0x6E, 0xEF, 0xBF, 0xBD, 0x09, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD,
-//     0x34, 0x65, 0x70, 0x15, 0x65, 0x10, 0x3A, 0x6B, 0x0F, 0xEF, 0xBF, 0xBD, 0xEF, 0xBF, 0xBD, 0x6B,
-//     0x64, 0x18, 0x0E,
-// ]);
-//  = new Uint8Array([
-//     48, 194, 130, 2, 81, 48, 194, 130,
-//     1, 195, 187, 194, 160, 3, 2, 1,
-//     2, 2, 1, 0, 48, 13, 6, 9,
-//     42, 194, 134, 72, 194, 134, 195, 183,
-//     13, 1, 1, 4, 5, 0, 48, 87,
-//     49, 11, 48, 9, 6, 3, 85, 4,
-//     6, 19, 2, 67, 78, 49, 11, 48,
-//     9, 6, 3, 85, 4, 8, 19, 2,
-//     80, 78, 49, 11, 48, 9, 6, 3,
-//     85, 4, 7, 19, 2, 67, 78, 49,
-//     11, 48, 9, 6, 3, 85, 4, 10,
-//     19, 2, 79, 78, 49, 11, 48, 9,
-//     6, 3, 85, 4, 11, 19, 2, 85,
-//     78, 49, 20, 48, 18, 6, 3, 85,
-//     4, 3, 19, 11, 72, 101, 114, 111,
-//     110, 103, 32, 89, 97, 110, 103, 48,
-//     30, 23, 13, 48, 53, 48, 55, 49,
-//     53, 50, 49, 49, 57, 52, 55, 90,
-//     23, 13, 48, 53, 48, 56, 49, 52,
-//     50, 49, 49, 57, 52, 55, 90, 48,
-//     87, 49, 11, 48, 9, 6, 3, 85,
-//     4, 6, 19, 2, 67, 78, 49, 11,
-//     48, 9, 6, 3, 85, 4, 8, 19,
-//     2, 80, 78, 49, 11, 48, 9, 6,
-//     3, 85, 4, 7, 19, 2, 67, 78,
-//     49, 11, 48, 9, 6, 3, 85, 4,
-//     10, 19, 2, 79, 78, 49, 11, 48,
-//     9, 6, 3, 85, 4, 11, 19, 2,
-//     85, 78, 49, 20, 48, 18, 6, 3,
-//     85, 4, 3, 19, 11, 72, 101, 114,
-//     111, 110, 103, 32, 89, 97, 110, 103,
-//     48, 92, 48, 13, 6, 9, 42, 194,
-//     134, 72, 194, 134, 195, 183, 13, 1,
-//     1, 1, 5, 0, 3, 75, 0, 48,
-//     72, 2, 65, 0, 194, 169, 195, 166,
-//     25, 195, 134, 195, 174, 194, 136, 1,
-//     194, 134, 195, 153, 114, 194, 158, 194,
-//     147, 194, 146, 195, 155, 87, 1, 123,
-//     2, 194, 132, 195, 188, 30, 195, 163,
-//     87, 94, 42, 123, 43, 37, 194, 158,
-//     194, 189, 194, 186, 195, 133, 194, 149,
-//     44, 73, 89, 40, 195, 159, 194, 166,
-//     103, 194, 134, 38, 194, 142, 195, 191,
-//     54, 195, 140, 58, 194, 132, 92, 40,
-//     194, 175, 111, 17, 195, 136, 12, 194,
-//     181, 195, 130, 195, 133, 194, 185, 4,
-//     195, 150, 14, 93, 195, 145, 2, 3,
-//     1, 0, 1, 194, 163, 194, 129, 194,
-//     177, 48, 194, 129, 194, 174, 48, 29,
-//     6, 3, 85, 29, 14, 4, 22, 4,
-//     20, 85, 195, 136, 195, 175, 73, 43,
-//     93, 195, 164, 3, 195, 133, 194, 152,
-//     27, 104, 36, 40, 71, 194, 136, 195,
-//     148, 14, 119, 4, 48, 127, 6, 3,
-//     85, 29, 35, 4, 120, 48, 118, 194,
-//     128, 20, 85, 195, 136, 195, 175, 73,
-//     43, 93, 195, 164, 3, 195, 133, 194,
-//     152, 27, 104, 36, 40, 71, 194, 136,
-//     195, 148, 14, 119, 4, 194, 161, 91,
-//     194, 164, 89, 48, 87, 49, 11, 48,
-//     9, 6, 3, 85, 4, 6, 19, 2,
-//     67, 78, 49, 11, 48, 9, 6, 3,
-//     85, 4, 8, 19, 2, 80, 78, 49,
-//     11, 48, 9, 6, 3, 85, 4, 7,
-//     19, 2, 67, 78, 49, 11, 48, 9,
-//     6, 3, 85, 4, 10, 19, 2, 79,
-//     78, 49, 11, 48, 9, 6, 3, 85,
-//     4, 11, 19, 2, 85, 78, 49, 20,
-//     48, 18, 6, 3, 85, 4, 3, 19,
-//     11, 72, 101, 114, 111, 110, 103, 32,
-//     89, 97, 110, 103, 194, 130, 1, 0,
-//     48, 12, 6, 3, 85, 29, 19, 4,
-//     5, 48, 3, 1, 1, 195, 191, 48,
-//     13, 6, 9, 42, 194, 134, 72, 194,
-//     134, 195, 183, 13, 1, 1, 4, 5,
-//     0, 3, 65, 0, 63, 194, 186, 12,
-//     195, 129, 194, 174, 56, 195, 138, 195,
-//     182, 55, 22, 194, 156, 53, 95, 24,
-//     121, 100, 195, 158, 39, 13, 70, 194,
-//     173, 40, 87, 194, 180, 98, 195, 159,
-//     108, 195, 191, 195, 184, 116, 23, 195,
-//     171, 194, 182, 194, 145, 126, 6, 110,
-//     195, 172, 194, 165, 194, 157, 35, 195,
-//     162, 110, 90, 110, 195, 131, 9, 195,
-//     186, 195, 143, 52, 101, 112, 21, 101,
-//     16, 58, 107, 15, 194, 185, 195, 175,
-//     107, 100, 24, 14
-// ]);
+const decodedCertBuf = Buffer.from("MIICUTCCAfugAwIBAgIBADANBgkqhkiG9w0BAQQFADBXMQswCQYDVQQGEwJDTjELMAkGA1UECBMCUE4xCzAJBgNVBAcTAkNOMQswCQYDVQQKEwJPTjELMAkGA1UECxMCVU4xFDASBgNVBAMTC0hlcm9uZyBZYW5nMB4XDTA1MDcxNTIxMTk0N1oXDTA1MDgxNDIxMTk0N1owVzELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAlBOMQswCQYDVQQHEwJDTjELMAkGA1UEChMCT04xCzAJBgNVBAsTAlVOMRQwEgYDVQQDEwtIZXJvbmcgWWFuZzBcMA0GCSqGSIb3DQEBAQUAA0sAMEgCQQCp5hnG7ogBhtlynpOS21cBewKE/B7jV14qeyslnr26xZUsSVko36ZnhiaO/zbMOoRcKK9vEcgMtcLFuQTWDl3RAgMBAAGjgbEwga4wHQYDVR0OBBYEFFXI70krXeQDxZgbaCQoR4jUDncEMH8GA1UdIwR4MHaAFFXI70krXeQDxZgbaCQoR4jUDncEoVukWTBXMQswCQYDVQQGEwJDTjELMAkGA1UECBMCUE4xCzAJBgNVBAcTAkNOMQswCQYDVQQKEwJPTjELMAkGA1UECxMCVU4xFDASBgNVBAMTC0hlcm9uZyBZYW5nggEAMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADQQA/ugzBrjjK9jcWnDVfGHlk3icNRq0oV7Ri32z/+HQX67aRfgZu7KWdI+JuWm7DCfrPNGVwFWUQOmsPue9rZBgO", "base64");
+const decodedCert = new Uint8Array(decodedCertBuf);
 
 const single =
 `-----BEGIN CERTIFICATE-----
@@ -547,107 +406,107 @@ Wm7DCfrPNGVwFWUQOmsPue9rZBgO
 describe('PEM encoder', () => {
     it('decodes a single object', () => {
         const decoded = PEMObject.parse(single);
-        expect(decoded.length).toBe(1);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 1);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
     });
 
     it('decodes two concatenated objects', () => {
         const decoded = PEMObject.parse(concatenated);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with whitespace between', () => {
         const decoded = PEMObject.parse(spaceBetween);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with leading whitespace', () => {
         const decoded = PEMObject.parse(leadingWhitespace);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with trailing whitespace', () => {
         const decoded = PEMObject.parse(trailingWhitespace);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with leading explanatory text', () => {
         const decoded = PEMObject.parse(leadingExplanatoryText);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with explanatory text between them', () => {
         const decoded = PEMObject.parse(middleExplanatoryText);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with trailing explanatory text', () => {
         const decoded = PEMObject.parse(trailingExplanatoryText);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with whitespace before the Base-64 encoded data', () => {
         const decoded = PEMObject.parse(whitespaceBeforeBase64);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with whitespace at the end of some of the base-64 encoded data lines', () => {
         const decoded = PEMObject.parse(base64LinesWithTrailingWhitespace);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects with short lines of base-64 encoded data', () => {
         const decoded = PEMObject.parse(shortLines);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 
     it('decodes two concatenated objects that combine all of the above deviations', () => {
         const decoded = PEMObject.parse(completelyScrewedUp);
-        expect(decoded.length).toBe(2);
-        expect(decoded[0].label).toBe("CERTIFICATE");
-        expect(decoded[1].label).toBe("CERTIFICATE");
-        expect(decoded[0].data).toEqual(decodedCert);
-        expect(decoded[1].data).toEqual(decodedCert);
+        assert.equal(decoded.length, 2);
+        assert.equal(decoded[0].label, "CERTIFICATE");
+        assert.equal(decoded[1].label, "CERTIFICATE");
+        assert.deepEqual(decoded[0].data, decodedCert);
+        assert.deepEqual(decoded[1].data, decodedCert);
     });
 });

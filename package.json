@@ -11,25 +11,9 @@
     ],
     "description": "A package for decoding Privacy-Enhanced Mail (PEM) objects",
     "devDependencies": {
-        "@babel/core": "^7.18.9",
-        "@babel/preset-env": "^7.18.9",
-        "@babel/preset-typescript": "^7.18.6",
-        "@types/base64-js": "^1.3.0",
-        "@types/node": "^18.0.6",
-        "@typescript-eslint/eslint-plugin": "^5.30.7",
-        "@typescript-eslint/parser": "^5.30.7",
-        "babel-jest": "^28.1.3",
-        "eslint": "^8.20.0",
-        "jest": "^28.1.3",
-        "jest-junit": "^14.0.0",
-        "npm-check-updates": "^15.3.4",
-        "ts-loader": "^9.3.1",
-        "typescript": "^4.7.4",
-        "webpack": "^5.73.0",
-        "webpack-cli": "^4.10.0"
+        "typescript": "5.x.x"
     },
     "directories": {
-        "doc": "documentation",
         "test": "test"
     },
     "files": [
@@ -40,22 +24,21 @@
         "PEM"
     ],
     "license": "MIT",
-    "main": "./dist/index.js",
+    "main": "./dist/index.mjs",
+    "type": "module",
     "name": "pem-ts",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/JonathanWilbur/pem-ts.git"
     },
     "scripts": {
-        "breaking-update": "npx npm-check-updates -u && npm install",
-        "build": "npx tsc && npx webpack",
+        "build": "npx tsc",
         "clean": "rm -rf dist; mkdir -p dist",
-        "lint": "npx eslint --config .eslintrc.yml './source/**/*.ts' || true",
-        "test": "npx jest --ci --reporters=default --reporters=jest-junit"
+        "test": "node --test"
     },
-    "types": "./dist/index.d.ts",
-    "version": "3.0.1",
+    "types": "./dist/index.d.mts",
+    "version": "4.0.0",
     "dependencies": {
-        "base64-js": "^1.5.1"
+        "@std/encoding": "npm:@jsr/std__encoding@^1.0.10"
     }
 }

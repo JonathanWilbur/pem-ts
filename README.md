@@ -1,17 +1,19 @@
 # PEM TypeScript Library
 
-* Author: [Jonathan M. Wilbur](https://jonathan.wilbur.space) <[jonathan@wilbur.space](mailto:jonathan@wilbur.space)>
-* Copyright Year: 2019
-* License: [MIT License](https://mit-license.org/)
+[![JSR](https://jsr.io/badges/@wildboar/pem)](https://jsr.io/@wildboar/pem)
+
+This module is published both on [npmjs.com] and [jsr.io].
+
+## ESM Notice
+
+As of version 4.0.0, released on July 5th, 2025, this module is ESM-only.
+CommonJS will no longer be supported.
 
 ## Building
 
-You can build this library by running `npm run build`.
-
-The outputs will all be in `dist`.
-
-* `./dist/pem.min.js` is the entire PEM library for the web browser, which is minified.
-* `./dist/index.js` is the entire NodeJS library.
+You can build this library by running `npm run build`. `./dist/index.mjs` is
+the NodeJS library, but it should also work on Deno, Cloudflare Workers, Bun,
+and in browsers.
 
 ## Library Usage
 
@@ -112,18 +114,6 @@ const pem : PEMObject = new PEMObject();
 pem.label = "CERTIFICATE";
 pem.data = new Uint8Array([ 0xFF, 0x00, 0xFF, 0x00 ]);
 console.log(pem.encoded); // Logs the PEM encoded object
-```
-
-### Validating PEM Files
-
-You can validate PEM object labels like so:
-
-```typescript
-const pem : PEMObject = new PEMObject();
-pem.label = "CERTIFICATE";
-console.log(pem.hasRFC7468CompliantLabel); // Logs "true"
-pem.label = "BLORPIFICATE";
-console.log(pem.hasRFC7468CompliantLabel); // Logs "false"
 ```
 
 ### Hacking PEM Files

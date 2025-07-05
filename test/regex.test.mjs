@@ -1,4 +1,6 @@
-const PEMObject = require("../../dist/index.js").PEMObject;
+import { PEMObject } from "../dist/index.mjs";
+import { describe, it } from "node:test";
+import { strict as assert } from "node:assert";
 
 describe('The PEMObject Regular Expression', () => {
 
@@ -21,6 +23,6 @@ Wm7DCfrPNGVwFWUQOmsPue9rZBgO
 
     it('decodes a single normal PEM object correctly', () => {
         const match = testPEM.match(PEMObject.pemObjectRegex);
-        expect(match).toBeTruthy();
+        assert.ok(match);
     });
 });

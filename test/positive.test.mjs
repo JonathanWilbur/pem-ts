@@ -1,4 +1,6 @@
-const PEMObject = require("../../dist/index.js").PEMObject;
+import { PEMObject } from "../dist/index.mjs";
+import { describe, it } from "node:test";
+import { strict as assert } from "node:assert";
 
 const testPEM =
 `-----BEGIN CERTIFICATE-----
@@ -36,14 +38,14 @@ describe('PEMObject', () => {
         pem.label = "CERTIFICATE";
         pem.data = originalData;
         pem.decode(pem.encoded);
-        expect(pem.data).toEqual(originalData);
+        assert.deepEqual(pem.data, originalData);
     });
 
     it('decoding then encoding returns the original data', () => {
         const pem = new PEMObject();
         pem.label = "CERTIFICATE";
         pem.decode(testPEM);
-        expect(pem.encoded).toEqual(testPEM);
+        assert.equal(pem.encoded, testPEM);
     });
 
     it('decodes without affecting the input PEM string', () => {
@@ -51,7 +53,7 @@ describe('PEMObject', () => {
         const pem = new PEMObject();
         pem.label = "CERTIFICATE";
         pem.decode(testPEM);
-        expect(testPEM).toBe(testPEMBefore);
+        assert.equal(testPEM, testPEMBefore);
     });
 
     it('encodes nullipotently', () => {
@@ -59,7 +61,7 @@ describe('PEMObject', () => {
         const pem = new PEMObject();
         pem.label = "CERTIFICATE";
         pem.decode(testPEM);
-        expect(pem.encoded).toBe(pem.encoded);
-        expect(testPEM).toBe(testPEMBefore);
+        assert.equal(pem.encoded, pem.encoded);
+        assert.equal(testPEM, testPEMBefore);
     });
 });

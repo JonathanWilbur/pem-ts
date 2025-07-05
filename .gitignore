@@ -1,7 +1,4 @@
 dist/
-test/jail/
-rubbish/
-junit.xml
 
 # Private keys, wallets, and other sensitive items.
 *.der

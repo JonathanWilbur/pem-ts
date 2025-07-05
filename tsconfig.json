@@ -1,24 +1,16 @@
 {
     "compilerOptions": {
-        /* Basic Options */
-        "target": "ESNEXT",
-        "module": "commonjs",
-        // "lib": [],
+        "target": "es2020",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "allowJs": false,
-        // "checkJs": true,
-        // "jsx": "preserve",
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
-        // "outFile": "./",
         "outDir": "./dist",
-        // "rootDir": "./",
-        // "composite": true,
         "removeComments": true,
-        // "noEmit": true,
         "importHelpers": true,
-        // "downlevelIteration": true,
-        // "isolatedModules": true,
+        "isolatedModules": true,
         "strict": true,
         "noImplicitAny": true,
         "strictNullChecks": true,
@@ -30,20 +22,16 @@
         "noUnusedParameters": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        // "moduleResolution": "node",
-        // "baseUrl": "./",
-        // "paths": {},
-        // "rootDirs": [],
-        // "typeRoots": [],
-        // "types": [],
-        // "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true
-        // "preserveSymlinks": true,
-        // "sourceRoot": "",
-        // "mapRoot": "",
-        // "inlineSourceMap": true,
-        // "inlineSources": true,
-        // "experimentalDecorators": true,
-        // "emitDecoratorMetadata": true,
-    }
+        "esModuleInterop": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "noEmitOnError": true,
+        "preserveConstEnums": true,
+        "resolveJsonModule": false,
+        "checkJs": false
+    },
+    "include": [
+        "source/index.mts"
+    ]
 }
