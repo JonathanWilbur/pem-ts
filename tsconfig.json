@@ -29,7 +29,8 @@
         "noEmitOnError": true,
         "preserveConstEnums": true,
         "resolveJsonModule": false,
-        "checkJs": false
+        "checkJs": false,
+        "skipLibCheck": true
     },
     "include": [
         "source/index.mts"

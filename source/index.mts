@@ -1,4 +1,4 @@
-import { encodeBase64, decodeBase64 } from "@std/encoding";
+import { fromArrayBuffer as encodeBase64, toArrayBuffer as decodeBase64 } from "@hexagon/base64";
 
 /**
  * An error thrown when a PEM object is malformed.
@@ -108,6 +108,13 @@ export class PEMObject {
      */
     public data: Uint8Array = new Uint8Array(0);
 
+    private dataAsArrayBuffer(): ArrayBuffer | SharedArrayBuffer {
+        return this.data.buffer.slice(
+            this.data.byteOffset,
+            this.data.byteOffset + this.data.byteLength
+        );
+    }
+
     /**
      * Get the pre-encapsulation boundary of the PEM object.
      */
@@ -123,7 +130,10 @@ export class PEMObject {
     }
 
     public get encapsulatedTextPortion (): string {
-        const base64data: string = encodeBase64(this.data);
+        // I know the type-casting is sloppy, but the underlying base64 code
+        // should accept either, and I submitted a
+        // [PR](https://github.com/Hexagon/base64/pull/188) to relax the types.
+        const base64data: string = encodeBase64(this.dataAsArrayBuffer() as ArrayBuffer);
         const stringSplitter: RegExp = /.{1,64}/g;
         return (base64data.match(stringSplitter) || []).join("\n");
     }
@@ -138,7 +148,7 @@ export class PEMObject {
         if (label !== undefined) this.label = label;
         if (data !== undefined) {
             if (typeof data === "string") {
-                this.data = decodeBase64(data);
+                this.data = new Uint8Array(decodeBase64(data));
             } else {
                 this.data = data;
             }
@@ -202,7 +212,7 @@ export class PEMObject {
         });
 
         const base64data: string = lines.slice(1, (lines.length - 1)).join("").replace(/\s+/g, "");
-        this.data = decodeBase64(base64data);
+        this.data = new Uint8Array(decodeBase64(base64data));
     }
 
     /**
